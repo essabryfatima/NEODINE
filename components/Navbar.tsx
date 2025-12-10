@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, User, Menu, X, UtensilsCrossed } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as m, AnimatePresence } from 'framer-motion';
 import { NAV_LINKS } from '../constants';
 import { CartItem } from '../types';
+import SocialLinks from './SocialLinks';
+
+const motion = m as any;
 
 interface NavbarProps {
   cartCount: number;
@@ -75,6 +78,8 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, onCartClick, onLoginClick, i
 
           {/* Icons */}
           <div className="flex items-center space-x-6 text-gray-300">
+            {/* Social Links Removed from Header */}
+
             <motion.button 
               whileHover={{ scale: 1.2, color: '#00f3ff' }}
               onClick={onCartClick}
@@ -102,9 +107,6 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, onCartClick, onLoginClick, i
                     <User className={`w-5 h-5 ${isLoggedIn ? 'text-neon-green' : 'text-gray-300'}`} />
                 </div>
               </div>
-              <span className="text-sm font-medium hidden lg:block">
-                {isLoggedIn ? 'Welcome, Alex' : 'Login / Join'}
-              </span>
             </motion.button>
 
             {/* Mobile Hamburger */}
@@ -139,6 +141,10 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, onCartClick, onLoginClick, i
                   {link}
                 </button>
               ))}
+              <div className="px-3 py-4 border-t border-white/10 mt-2">
+                  <p className="text-xs text-gray-500 mb-2 font-bold uppercase">Follow Us</p>
+                  <SocialLinks />
+              </div>
             </div>
           </motion.div>
         )}

@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { Plus, Flame, Leaf, Play } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { motion as m } from 'framer-motion';
+import { Plus, Flame, Leaf, Star, Zap } from 'lucide-react';
 import { Dish } from '../types';
+
+const motion = m as any;
 
 interface MenuSectionProps {
   title: string;
@@ -9,91 +11,175 @@ interface MenuSectionProps {
   onAddToCart: (dish: Dish) => void;
 }
 
-const MenuSection: React.FC<MenuSectionProps> = ({ title, dishes, onAddToCart }) => {
-  const [hoveredId, setHoveredId] = useState<number | null>(null);
+const MenuCard: React.FC<{ dish: Dish; onAddToCart: (dish: Dish) => void }> = ({ dish, onAddToCart }) => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const safePlay = () => {
+    if (videoRef.current && dish.videoUrl && !videoError) {
+      const playPromise = videoRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => setIsPlaying(true))
+          .catch((error) => {
+            setIsPlaying(false);
+          });
+      }
+    }
+  };
+
+  const handleMouseEnter = () => {
+    safePlay();
+  };
+
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      // safe pause logic
+      if (!videoRef.current.paused) {
+          videoRef.current.pause();
+      }
+      videoRef.current.currentTime = 0; // Reset to start
+      setIsPlaying(false);
+    }
+  };
+
+  const toggleVideo = () => {
+    if (!videoRef.current || !dish.videoUrl || videoError) return;
+    
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      safePlay();
+    }
+  };
 
   return (
-    <div className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <motion.h2 
-        initial={{ opacity: 0, x: -20 }}
-        whileInView={{ opacity: 1, x: 0 }}
-        className="text-3xl md:text-4xl font-display font-bold text-white mb-8 flex items-center gap-3"
+    <motion.div
+      className="bg-slate-900 border border-white/10 rounded-xl overflow-hidden group hover:border-neon-blue hover:shadow-[0_0_20px_rgba(0,243,255,0.15)] transition-all duration-300 flex flex-col h-full"
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ y: -5 }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={toggleVideo}
+    >
+      {/* Image / Video Area */}
+      <div className="h-64 overflow-hidden relative bg-black shrink-0">
+        <img
+          src={dish.image}
+          alt={dish.name}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        
+        {dish.videoUrl && !videoError && (
+          <video
+            ref={videoRef}
+            src={dish.videoUrl}
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={dish.image}
+            onError={() => setVideoError(true)}
+            className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}
+          />
+        )}
+        
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors pointer-events-none" />
+
+        {/* CENTERED ADD TO CART BUTTON */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 pointer-events-none group-hover:pointer-events-auto">
+             <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                  e.stopPropagation();
+                  onAddToCart(dish);
+                }}
+                aria-label={`Add ${dish.name} to cart`}
+                className="bg-neon-blue text-slate-950 px-6 py-3 rounded-full font-bold shadow-[0_0_20px_rgba(0,243,255,0.5)] flex items-center gap-2 backdrop-blur-md"
+            >
+                <Plus size={20} strokeWidth={3} />
+                <span>ADD TO CART</span>
+            </motion.button>
+        </div>
+
+        {/* Tags */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10 pointer-events-none">
+          {dish.isSpicy && (
+              <span className="bg-red-500/90 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold tracking-widest flex items-center gap-1 text-white shadow-lg uppercase">
+                  <Flame size={10} /> Spicy
+              </span>
+          )}
+          {dish.isVegan && (
+              <span className="bg-green-500/90 backdrop-blur-md px-2 py-1 rounded text-[10px] font-bold tracking-widest flex items-center gap-1 text-white shadow-lg uppercase">
+                  <Leaf size={10} /> Vegan
+              </span>
+          )}
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div className="p-5 flex flex-col flex-grow bg-slate-950">
+        
+        {/* Header: Name & Price */}
+        <div className="flex justify-between items-start mb-3">
+            <h3 className="text-xl font-display font-bold text-white leading-tight">
+                {dish.name}
+            </h3>
+            <span className="text-xl font-display font-bold text-neon-blue tracking-tight shrink-0 ml-2">
+                {dish.price} $
+            </span>
+        </div>
+        
+        {/* Body: Description */}
+        <p className="text-gray-400 text-sm mb-6 line-clamp-2 leading-relaxed flex-grow">
+            {dish.description}
+        </p>
+
+        {/* Footer: Kcal & Rating */}
+        <div className="pt-4 border-t border-white/10 flex items-center justify-between text-sm">
+             <span className="text-gray-500 font-medium uppercase tracking-wider">
+                {dish.calories} KCAL
+             </span>
+             
+             <div className="flex items-center gap-1.5">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span className="font-bold text-white">{dish.rating}</span>
+             </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const MenuSection: React.FC<MenuSectionProps> = ({ title, dishes, onAddToCart }) => {
+  return (
+    <div className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        className="flex items-end justify-between mb-10 border-b border-white/10 pb-4"
       >
-        <span className="w-2 h-8 bg-neon-blue rounded-full shadow-[0_0_15px_#00f3ff]"></span>
-        {title}
-      </motion.h2>
+        <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-slate-900 border border-white/10 rounded-lg flex items-center justify-center">
+                <Zap className="w-6 h-6 text-neon-blue" />
+            </div>
+            <div>
+                <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-wide uppercase">
+                    {title}
+                </h2>
+                <p className="text-gray-400 text-sm tracking-widest uppercase mt-1">Premium Selection</p>
+            </div>
+        </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
         {dishes.map((dish) => (
-          <motion.div
-            key={dish.id}
-            className="relative bg-slate-900/50 border border-white/5 rounded-2xl overflow-hidden group hover:border-neon-blue/50 transition-colors duration-300"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            whileHover={{ y: -10 }}
-            onMouseEnter={() => setHoveredId(dish.id)}
-            onMouseLeave={() => setHoveredId(null)}
-          >
-            {/* Image / Video Area */}
-            <div className="h-64 overflow-hidden relative">
-              <img
-                src={dish.image}
-                alt={dish.name}
-                className={`w-full h-full object-cover transition-transform duration-700 ${hoveredId === dish.id ? 'scale-110' : 'scale-100'}`}
-              />
-              
-              {/* Tags */}
-              <div className="absolute top-4 left-4 flex gap-2">
-                {dish.isSpicy && (
-                    <span className="bg-red-600/80 backdrop-blur px-2 py-1 rounded text-xs font-bold flex items-center gap-1 text-white">
-                        <Flame size={12} /> SPICY
-                    </span>
-                )}
-                {dish.isVegan && (
-                    <span className="bg-green-600/80 backdrop-blur px-2 py-1 rounded text-xs font-bold flex items-center gap-1 text-white">
-                        <Leaf size={12} /> VEGAN
-                    </span>
-                )}
-              </div>
-
-              {/* Overlay on Hover */}
-              <div className={`absolute inset-0 bg-black/60 backdrop-blur-[2px] flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
-                 {dish.videoUrl && (
-                     <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        className="mb-4 w-12 h-12 rounded-full bg-white/20 border border-white/50 flex items-center justify-center text-white"
-                        onClick={() => alert(`Playing preview for ${dish.name}...`)}
-                     >
-                         <Play className="fill-current ml-1" size={20} />
-                     </motion.button>
-                 )}
-                 <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => onAddToCart(dish)}
-                    className="bg-neon-blue text-black font-bold px-6 py-2 rounded-full flex items-center gap-2 shadow-[0_0_20px_rgba(0,243,255,0.4)]"
-                 >
-                    <Plus size={18} /> ADD TO CART
-                 </motion.button>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-xl font-bold text-white group-hover:text-neon-blue transition-colors">{dish.name}</h3>
-                <span className="text-neon-green font-display font-bold text-lg">${dish.price}</span>
-              </div>
-              <p className="text-gray-400 text-sm mb-4 line-clamp-2">{dish.description}</p>
-              <div className="flex items-center justify-between text-xs text-gray-500 border-t border-white/10 pt-4">
-                <span>{dish.calories} KCAL</span>
-                <div className="flex items-center gap-1">
-                    <span className="text-yellow-400">★</span>
-                    <span>{dish.rating}</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+          <MenuCard key={dish.id} dish={dish} onAddToCart={onAddToCart} />
         ))}
       </div>
     </div>

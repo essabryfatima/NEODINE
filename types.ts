@@ -1,3 +1,4 @@
+
 export interface Dish {
   id: number;
   name: string;
@@ -19,6 +20,17 @@ export interface Chef {
   image: string;
   availability: string;
   rating: number;
+  // New Profile Fields
+  bio: string;
+  education: string;
+  experience: string[];
+  philosophy: string;
+  stats: {
+    creativity: number; // 0-100
+    precision: number;
+    speed: number;
+    tech: number;
+  };
 }
 
 export interface CartItem extends Dish {
@@ -40,6 +52,11 @@ export interface Order {
   total: number;
   status: 'preparing' | 'cooking' | 'ready' | 'delivering' | 'delivered';
   timestamp: number;
+  // Delivery Details
+  deliveryMethod: 'drone' | 'partner';
+  deliveryAddress: string;
+  contactPhone: string;
+  customerName: string;
 }
 
 export interface User {
@@ -47,4 +64,10 @@ export interface User {
   email: string;
   avatar: string;
   isLoggedIn: boolean;
+}
+
+export interface ToastMessage {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info';
 }

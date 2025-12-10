@@ -1,6 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion as m } from 'framer-motion';
 import { Utensils, Calendar } from 'lucide-react';
+
+const motion = m as any;
 
 interface HeroProps {
   onBookTable: () => void;
@@ -10,13 +12,22 @@ interface HeroProps {
 const Hero: React.FC<HeroProps> = ({ onBookTable, onViewMenu }) => {
   return (
     <div className="relative w-full min-h-screen overflow-hidden flex items-center">
-      {/* Background Video/Image */}
-      <div className="absolute inset-0">
-        <img
-          src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&auto=format&fit=crop&q=80"
-          alt="Futuristic Restaurant"
+      {/* Background Video */}
+      <div className="absolute inset-0 z-0">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&auto=format&fit=crop&q=80"
           className="w-full h-full object-cover opacity-60"
-        />
+        >
+          {/* Replaced broken Mixkit URL with reliable Pixabay Abstract Tech/Neon video */}
+          <source src="https://cdn.pixabay.com/video/2020/09/25/51187-463234857_large.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        
         {/* Overlay */}
         <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
@@ -83,7 +94,7 @@ const Hero: React.FC<HeroProps> = ({ onBookTable, onViewMenu }) => {
                 {/* Glow behind */}
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-neon-blue/20 rounded-full blur-[100px] animate-pulse"></div>
                 
-                {/* Floating Dish Image - Using a high quality Unsplash image cropped to circle for reliability */}
+                {/* Floating Dish Image */}
                 <div className="relative z-10 w-[400px] h-[400px] rounded-full overflow-hidden border-4 border-white/10 shadow-[0_0_50px_rgba(0,243,255,0.2)]">
                     <img 
                         src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80"
