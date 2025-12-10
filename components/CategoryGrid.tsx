@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion as m } from 'framer-motion';
 import { CHEFS } from '../constants';
@@ -39,8 +40,8 @@ const ChefGrid: React.FC<ChefGridProps> = ({ onBookChef, onViewProfile, onViewAl
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {displayedChefs.map((chef, index) => {
-          // All chefs aligned Left-to-Right (Start)
-          const alignClass = "items-start text-left";
+          // Reverted to Centered alignment as requested
+          const alignClass = "items-center text-center";
 
           return (
             <motion.div

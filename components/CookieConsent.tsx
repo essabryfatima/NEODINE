@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion as m, AnimatePresence } from 'framer-motion';
 import { Cookie, X, Shield, Settings } from 'lucide-react';
@@ -26,7 +27,8 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onViewPolicy }) => {
   useEffect(() => {
     const savedConsent = localStorage.getItem('neo-dine-cookie-consent');
     if (!savedConsent) {
-      setTimeout(() => setShowBanner(true), 1500);
+      // Show immediately without delay
+      setShowBanner(true);
     } else {
       setPreferences(JSON.parse(savedConsent));
     }
@@ -57,14 +59,16 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onViewPolicy }) => {
 
   return (
     <>
-      {/* Floating Settings Button */}
-      <button
-        onClick={() => setShowModal(true)}
-        className="fixed bottom-4 left-4 z-40 p-3 bg-slate-900/80 backdrop-blur border border-white/10 rounded-full hover:bg-slate-800 transition-colors group"
-        aria-label="Cookie Preferences"
-      >
-        <Cookie className="w-5 h-5 text-gray-400 group-hover:text-neon-blue" />
-      </button>
+      {/* Floating Settings Button (Visible after banner is closed) */}
+      {!showBanner && (
+        <button
+          onClick={() => setShowModal(true)}
+          className="fixed bottom-4 left-4 z-40 p-3 bg-slate-900/80 backdrop-blur border border-white/10 rounded-full hover:bg-slate-800 transition-colors group"
+          aria-label="Cookie Preferences"
+        >
+          <Cookie className="w-5 h-5 text-gray-400 group-hover:text-neon-blue" />
+        </button>
+      )}
 
       {/* Banner */}
       <AnimatePresence>
@@ -82,9 +86,9 @@ const CookieConsent: React.FC<CookieConsentProps> = ({ onViewPolicy }) => {
                   Cookie Policy
                 </h3>
                 <p className="text-gray-400 text-sm leading-relaxed max-w-3xl">
-                  We use cookies to enhance your futuristic dining experience. Some are strictly necessary for the site to function, while others help us analyze traffic and personalize content. 
-                  By clicking "Accept All", you consent to our use of cookies. You can manage your preferences or withdraw consent at any time.
-                  <button onClick={onViewPolicy} className="text-neon-blue hover:text-white underline ml-1 font-medium transition-colors">
+                  We use cookies to enhance your futuristic dining experience. Some are essential for the site to function, while others help us analyze traffic and personalize content. 
+                  <br className="hidden md:block" />
+                  <button onClick={onViewPolicy} className="text-neon-blue hover:text-white underline font-medium transition-colors mt-1 inline-block">
                     Read our full Cookie Policy.
                   </button>
                 </p>

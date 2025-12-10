@@ -285,10 +285,18 @@ const App: React.FC = () => {
 
     // Default to Home/Hero
     return (
-        <Hero 
-            onBookTable={() => setBookingModal({ isOpen: true, type: 'table' })} 
-            onViewMenu={() => { setActiveTab('Menu'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-        />
+        <>
+            <Hero 
+                onBookTable={() => setBookingModal({ isOpen: true, type: 'table' })} 
+                onViewMenu={() => { setActiveTab('Menu'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            />
+            <ChefGrid 
+                limit={2}
+                onBookChef={(id) => setBookingModal({ isOpen: true, type: 'chef', chefId: id })} 
+                onViewProfile={(chef) => setSelectedChefProfile(chef)}
+                onViewAll={() => { setActiveTab('Chefs'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            />
+        </>
     );
   };
 

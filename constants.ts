@@ -1,5 +1,3 @@
-
-
 import { Dish, Chef } from './types';
 
 export const SOCIAL_LINKS = {
